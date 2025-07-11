@@ -142,11 +142,40 @@
   onMount(() => {
     const container = document.querySelector('.timeline-container');
     if (container) {
-      // Initial scroll position to show a relevant part of the timeline
-      const initialScrollX = yearToX(Math.max(-500, earliestYear));
+      // Initial scroll position to show a more central part of the timeline
+      // Start around year 0 to 1000 for better initial viewing
+      const centerYear = 500; // Show around 500 AD as a good central point
+      const initialScrollX = Math.max(0, yearToX(centerYear) - (container.clientWidth / 2));
       container.scrollLeft = initialScrollX;
     }
   });
+
+  // Function to constrain popup position within viewport
+  function constrainPopupPosition(clientX, clientY) {
+    const popup = { width: 220, height: 300 }; // Approximate popup dimensions
+    const margin = 20; // Margin from viewport edges
+    
+    let x = clientX;
+    let y = clientY;
+    
+    // Constrain horizontally
+    if (x + popup.width/2 > window.innerWidth - margin) {
+      x = window.innerWidth - popup.width/2 - margin;
+    }
+    if (x - popup.width/2 < margin) {
+      x = popup.width/2 + margin;
+    }
+    
+    // Constrain vertically
+    if (y + popup.height/2 > window.innerHeight - margin) {
+      y = window.innerHeight - popup.height/2 - margin;
+    }
+    if (y - popup.height/2 < margin) {
+      y = popup.height/2 + margin;
+    }
+    
+    return { x, y };
+  }
 </script>
 
 <style>
@@ -322,8 +351,9 @@
           <g 
             on:click={(e) => {
               selectedPerson = item;
-              tooltipX = e.clientX;
-              tooltipY = e.clientY;
+              const constrainedPos = constrainPopupPosition(e.clientX, e.clientY);
+              tooltipX = constrainedPos.x;
+              tooltipY = constrainedPos.y;
               e.stopPropagation();
             }}
           >
@@ -374,8 +404,9 @@
           <g 
             on:click={(e) => {
               selectedPerson = item;
-              tooltipX = e.clientX;
-              tooltipY = e.clientY;
+              const constrainedPos = constrainPopupPosition(e.clientX, e.clientY);
+              tooltipX = constrainedPos.x;
+              tooltipY = constrainedPos.y;
               e.stopPropagation();
             }}
           >

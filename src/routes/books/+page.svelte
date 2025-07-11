@@ -3,6 +3,8 @@
   import TimelineChart from '$lib/components/TimelineChart.svelte';
   import books from '$lib/data/books.json';
   import { base } from '$app/paths';
+
+
 </script>
 
 <style>
@@ -30,11 +32,17 @@
     overflow: hidden;
   }
   
-  .navigation-icon {
+  .navigation-controls {
     position: fixed;
     top: 20px;
     left: 20px;
     z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .navigation-icon {
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 50%;
     width: 50px;
@@ -47,16 +55,25 @@
     font-size: 24px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s, background-color 0.2s;
+    border: none;
+    cursor: pointer;
   }
   
   .navigation-icon:hover {
     transform: scale(1.1);
     background-color: rgba(0, 0, 0, 0.8);
   }
+
+
 </style>
 
 <div class="timeline-wrapper">
   <TimelineChart items={books} />
 </div>
 
-<a href="{base}/people" class="navigation-icon" title="Go to People Timeline">👤</a>
+<div class="navigation-controls">
+  <a href="{base}/people" class="navigation-icon" title="Go to People Timeline">👤</a>
+  <a href="{base}/search" class="navigation-icon" title="Search Timeline">🔍</a>
+</div>
+
+
