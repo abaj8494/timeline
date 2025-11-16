@@ -138,9 +138,17 @@
   let tooltipX = 0;
   let tooltipY = 0;
   
+  // Panning state
+  let isPanning = false;
+  let startX = 0;
+  let startY = 0;
+  let scrollLeft = 0;
+  let scrollTop = 0;
+  let container;
+  
   // Initialize when mounted
   onMount(() => {
-    const container = document.querySelector('.timeline-container');
+    container = document.querySelector('.timeline-container');
     if (container) {
       // Initial scroll position to show a more central part of the timeline
       // Start around year 0 to 1000 for better initial viewing
@@ -149,6 +157,50 @@
       container.scrollLeft = initialScrollX;
     }
   });
+  
+  // Panning handlers
+  function handleMouseDown(e) {
+    // Don't start panning if clicking on interactive elements
+    if (e.target.closest('.person-bar, .book-dot, .person-name, .book-title, .image-popup')) {
+      return;
+    }
+    
+    isPanning = true;
+    startX = e.pageX - container.offsetLeft;
+    startY = e.pageY - container.offsetTop;
+    scrollLeft = container.scrollLeft;
+    scrollTop = container.scrollTop;
+    container.style.cursor = 'grabbing';
+  }
+  
+  function handleMouseMove(e) {
+    if (!isPanning) return;
+    e.preventDefault();
+    
+    const x = e.pageX - container.offsetLeft;
+    const y = e.pageY - container.offsetTop;
+    const walkX = (x - startX) * 1.5; // Multiplier for smoother panning
+    const walkY = (y - startY) * 1.5;
+    
+    container.scrollLeft = scrollLeft - walkX;
+    container.scrollTop = scrollTop - walkY;
+  }
+  
+  function handleMouseUp() {
+    isPanning = false;
+    if (container) {
+      container.style.cursor = 'grab';
+    }
+  }
+  
+  function handleMouseLeave() {
+    if (isPanning) {
+      isPanning = false;
+      if (container) {
+        container.style.cursor = 'grab';
+      }
+    }
+  }
 
   // Function to constrain popup position within viewport
   function constrainPopupPosition(clientX, clientY) {
@@ -184,7 +236,13 @@
     height: 100vh;
     background-color: #1C1E21;
     position: relative;
-    overflow: auto; /* Enable standard scrolling */
+    overflow: auto;
+    cursor: grab;
+    user-select: none; /* Prevent text selection while dragging */
+  }
+  
+  .timeline-container:active {
+    cursor: grabbing;
   }
   
   .timeline-content {
@@ -295,7 +353,13 @@
   }
 </style>
 
-<div class="timeline-container">
+<div 
+  class="timeline-container"
+  on:mousedown={handleMouseDown}
+  on:mousemove={handleMouseMove}
+  on:mouseup={handleMouseUp}
+  on:mouseleave={handleMouseLeave}
+>
   <div class="timeline-content" style="width: {width}px; height: {height}px;">
     <svg width={width} height={height}>
       <!-- Background -->

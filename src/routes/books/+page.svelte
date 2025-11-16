@@ -4,8 +4,20 @@
   import books from '$lib/data/books.json';
   import { base } from '$app/paths';
 
-
+  export let data;
 </script>
+
+<svelte:head>
+  <title>{data.title}</title>
+  <meta name="description" content={data.description} />
+  <meta property="og:title" content={data.title} />
+  <meta property="og:description" content={data.description} />
+  <meta property="og:image" content={data.ogImage} />
+  <meta property="og:url" content="https://yourdomain.com/shrine/books" />
+  <meta name="twitter:title" content={data.title} />
+  <meta name="twitter:description" content={data.description} />
+  <meta name="twitter:image" content={data.ogImage} />
+</svelte:head>
 
 <style>
   :global(body) {

@@ -4,7 +4,13 @@ const dev = process.env.NODE_ENV === 'development';
 
 export default {
   kit: {
-    adapter: adapter(),
+    adapter: adapter({
+      pages: 'docs',
+      assets: 'docs',
+      fallback: undefined,
+      precompress: false,
+      strict: true
+    }),
     paths: {
       base: dev ? '' : '/shrine'
     },
