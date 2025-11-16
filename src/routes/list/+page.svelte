@@ -42,6 +42,11 @@
     background-color: #1C1E21;
     color: white;
     font-family: system-ui, -apple-system, sans-serif;
+    overflow-y: auto;
+  }
+  
+  :global(html) {
+    overflow-y: auto;
   }
 
   .list-page {
