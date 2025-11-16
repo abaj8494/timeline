@@ -728,14 +728,6 @@
     "gender": 0
   },
   {
-    "id": "penrose",
-    "name": "Roger Penrose",
-    "born": 1931,
-    "died": null,
-    "image": "/images/people/penrose.jpg",
-    "gender": 1
-  },
-  {
     "id": "plath",
     "name": "Sylvia Plath",
     "born": 1932,
@@ -790,14 +782,6 @@
     "died": 2009,
     "image": "/images/people/jackson.jpg",
     "gender": 1
-  },
-  {
-    "id": "madonna",
-    "name": "Madonna",
-    "born": 1958,
-    "died": null,
-    "image": "/images/people/madonna.jpg",
-    "gender": 0
   },
   {
     "id": "diana",

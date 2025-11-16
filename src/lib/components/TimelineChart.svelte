@@ -335,6 +335,10 @@
     r: 8;
   }
   
+  /* Remove focus outline on click */
+  g:focus {
+    outline: none;
+  }
   
   .image-popup {
     position: fixed;
