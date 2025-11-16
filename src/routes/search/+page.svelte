@@ -306,7 +306,16 @@
             <div 
               class="result-item"
               class:selected={selectedItem?.id === item.id}
+              role="button"
+              tabindex="0"
+              aria-label="View details for {item.displayName}"
               on:click={() => selectItem(item)}
+              on:keydown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  selectItem(item);
+                }
+              }}
             >
               <div class="result-header">
                 <div class="result-name">{item.displayName}</div>

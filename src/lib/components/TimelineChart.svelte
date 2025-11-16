@@ -201,6 +201,27 @@
       }
     }
   }
+  
+  // Item click handler for keyboard accessibility
+  function handleItemClick(item, e) {
+    selectedPerson = item;
+    const constrainedPos = constrainPopupPosition(e.clientX, e.clientY);
+    tooltipX = constrainedPos.x;
+    tooltipY = constrainedPos.y;
+    e.stopPropagation();
+  }
+  
+  // Keyboard handler for accessibility
+  function handleItemKeydown(item, e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      selectedPerson = item;
+      const rect = e.target.getBoundingClientRect();
+      const constrainedPos = constrainPopupPosition(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      tooltipX = constrainedPos.x;
+      tooltipY = constrainedPos.y;
+    }
+  }
 
   // Function to constrain popup position within viewport
   function constrainPopupPosition(clientX, clientY) {
@@ -314,11 +335,6 @@
     r: 8;
   }
   
-  .date-label {
-    fill: #aaa;
-    font-size: 9px;
-    pointer-events: none;
-  }
   
   .image-popup {
     position: fixed;
@@ -355,6 +371,8 @@
 
 <div 
   class="timeline-container"
+  role="application"
+  aria-label="Interactive timeline visualization - click and drag to pan"
   on:mousedown={handleMouseDown}
   on:mousemove={handleMouseMove}
   on:mouseup={handleMouseUp}
@@ -413,13 +431,11 @@
           
           <!-- Book dot group with pointer events -->
           <g 
-            on:click={(e) => {
-              selectedPerson = item;
-              const constrainedPos = constrainPopupPosition(e.clientX, e.clientY);
-              tooltipX = constrainedPos.x;
-              tooltipY = constrainedPos.y;
-              e.stopPropagation();
-            }}
+            role="button"
+            tabindex="0"
+            aria-label="{displayName} by {item.author}, published {formatYear(yearValue)}"
+            on:click={(e) => handleItemClick(item, e)}
+            on:keydown={(e) => handleItemKeydown(item, e)}
           >
             <!-- Book title -->
             <text 
@@ -466,13 +482,11 @@
           
           <!-- Person bar group with pointer events -->
           <g 
-            on:click={(e) => {
-              selectedPerson = item;
-              const constrainedPos = constrainPopupPosition(e.clientX, e.clientY);
-              tooltipX = constrainedPos.x;
-              tooltipY = constrainedPos.y;
-              e.stopPropagation();
-            }}
+            role="button"
+            tabindex="0"
+            aria-label="{displayName}, {selectedPerson?.born ? formatYear(item.born) : ''} to {item.died ? formatYear(item.died) : 'present'}"
+            on:click={(e) => handleItemClick(item, e)}
+            on:keydown={(e) => handleItemKeydown(item, e)}
           >
             <!-- Person name -->
             <text 
