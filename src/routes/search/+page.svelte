@@ -257,10 +257,17 @@
     margin-top: 40px;
   }
 
-  .navigation-link {
+  .navigation-controls {
     position: fixed;
     top: 20px;
     left: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .navigation-link {
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 50%;
     width: 50px;
@@ -272,7 +279,6 @@
     text-decoration: none;
     font-size: 24px;
     transition: transform 0.2s, background-color 0.2s;
-    z-index: 100;
   }
 
   .navigation-link:hover {
@@ -281,7 +287,11 @@
   }
 </style>
 
-<a href="{base}/people" class="navigation-link" title="Back to Timeline">⏪</a>
+<div class="navigation-controls">
+  <a href="{base}/people" class="navigation-link" title="People Timeline">👤</a>
+  <a href="{base}/books" class="navigation-link" title="Books Timeline">📚</a>
+  <a href="{base}/list" class="navigation-link" title="List View">📋</a>
+</div>
 
 <div class="search-page">
   <div class="header">

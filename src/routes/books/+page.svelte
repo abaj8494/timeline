@@ -85,6 +85,7 @@
 
 <div class="navigation-controls">
   <a href="{base}/people" class="navigation-icon" title="Go to People Timeline">👤</a>
+  <a href="{base}/list" class="navigation-icon" title="List View">📋</a>
   <a href="{base}/search" class="navigation-icon" title="Search Timeline">🔍</a>
 </div>
 
