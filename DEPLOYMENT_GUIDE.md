@@ -94,6 +94,17 @@ npm run preview
 - `images/` - all images (people and books)
 - `robots.txt`, `sitemap.xml` - SEO files
 - `favicon.png` - site icon
+- `.nojekyll` - **CRITICAL**: Disables Jekyll processing on GitHub Pages (allows `_app` folder to be served)
+
+## Important: .nojekyll File
+
+The `.nojekyll` file in the `static/` folder is **critical** for GitHub Pages deployment. Without it:
+- GitHub Pages uses Jekyll by default
+- Jekyll ignores folders starting with underscore (like `_app/`)
+- Your JavaScript and CSS won't load
+- The site will be stuck on "Redirecting to people page..."
+
+The build process automatically copies `.nojekyll` from `static/` to `docs/`. Never delete this file!
 
 ## Build Warnings
 
