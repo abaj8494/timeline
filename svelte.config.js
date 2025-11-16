@@ -16,8 +16,9 @@ export default {
     },
     prerender: {
       handleHttpError: ({ path, referrer, message }) => {
-        // Allow 404 errors for static assets in development
-        if (path.startsWith('/images/') || path.startsWith('/icons/')) {
+        // Allow 404 errors for static assets (with or without base path)
+        if (path.startsWith('/images/') || path.startsWith('/icons/') || 
+            path.startsWith('/shrine/images/') || path.startsWith('/shrine/icons/')) {
           console.warn(`[Warning] Missing static asset: ${path} (referenced from ${referrer})`);
           return;
         }
