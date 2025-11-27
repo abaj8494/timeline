@@ -231,6 +231,28 @@
     }
   }
   
+  // Mouse wheel zoom handler
+  function handleWheel(e) {
+    // Check if user is holding Ctrl/Cmd (standard zoom modifier)
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      
+      const zoomSpeed = 0.001;
+      const delta = -e.deltaY;
+      const scaleChange = 1 + (delta * zoomSpeed);
+      const newScale = Math.max(0.5, Math.min(3, currentScale * scaleChange));
+      
+      currentScale = newScale;
+      
+      // Apply scale transform to the SVG content
+      const content = container?.querySelector('.timeline-content');
+      if (content) {
+        content.style.transform = `scale(${currentScale})`;
+        content.style.transformOrigin = 'center center';
+      }
+    }
+  }
+  
   // Touch event handlers for mobile pinch-to-zoom
   function getTouchDistance(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
@@ -445,11 +467,12 @@
 <div 
   class="timeline-container"
   role="application"
-  aria-label="Interactive timeline visualization - click and drag to pan, pinch to zoom on mobile"
+  aria-label="Interactive timeline visualization - click and drag to pan, hold Ctrl/Cmd and scroll to zoom, pinch to zoom on mobile"
   on:mousedown={handleMouseDown}
   on:mousemove={handleMouseMove}
   on:mouseup={handleMouseUp}
   on:mouseleave={handleMouseLeave}
+  on:wheel={handleWheel}
   on:touchstart={handleTouchStart}
   on:touchmove={handleTouchMove}
   on:touchend={handleTouchEnd}

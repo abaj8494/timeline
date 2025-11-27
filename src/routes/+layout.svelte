@@ -27,6 +27,12 @@
 						goto(`${base}/books`);
 					}
 					break;
+				case 'a':
+					// Only navigate to artworks if not already on artworks page
+					if (!currentPath.includes('/artworks')) {
+						goto(`${base}/artworks`);
+					}
+					break;
 				case 'l':
 					goto(`${base}/list`);
 					break;
@@ -48,20 +54,20 @@
 </script>
 
 <svelte:head>
-	<title>Shrine - Interactive Historical Timeline</title>
-	<meta name="description" content="Explore history through an interactive timeline of influential people and books" />
+	<title>Timeline - Interactive Historical Timeline</title>
+	<meta name="description" content="Explore history through an interactive timeline of influential people, books, and artworks" />
 	
 	<!-- Structured Data -->
 	{@html `<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
 		"@type": "WebSite",
-		"name": "Shrine Timeline",
-		"description": "An interactive timeline visualization of historical figures and influential books throughout history",
-		"url": "https://yourdomain.com/shrine/",
+		"name": "Timeline",
+		"description": "An interactive timeline visualization of historical figures, influential books, and famous artworks throughout history",
+		"url": "https://yourdomain.com/timeline/",
 		"potentialAction": {
 			"@type": "SearchAction",
-			"target": "https://yourdomain.com/shrine/search?q={search_term_string}",
+			"target": "https://yourdomain.com/timeline/search?q={search_term_string}",
 			"query-input": "required name=search_term_string"
 		}
 	}
