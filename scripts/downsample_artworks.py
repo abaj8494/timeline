@@ -75,8 +75,8 @@ def downsample_image(input_path, output_path, target_size_mb=1.0, max_dimension=
 def main():
     # Set up paths
     script_dir = Path(__file__).parent.parent
-    artworks_dir = script_dir / "static" / "images" / "artworks"
-    downsampled_dir = script_dir / "static" / "images" / "artworks-downsampled"
+    artworks_dir = script_dir / "static" / "images" / "artworks-original"
+    downsampled_dir = script_dir / "static" / "images" / "artworks"
     
     # Create output directory if it doesn't exist
     downsampled_dir.mkdir(exist_ok=True)

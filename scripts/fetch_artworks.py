@@ -54,6 +54,11 @@ DIRECT_IMAGE_URLS = {
     "Self-Portrait with Thorn Necklace and Hummingbird": "https://upload.wikimedia.org/wikipedia/en/1/1e/Frida_Kahlo_%28self_portrait%29.jpg",
     "The Disquieting Muses": "https://upload.wikimedia.org/wikipedia/en/d/df/The_Disquieting_Muses.jpg",
     "Irises": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Irises-Vincent_van_Gogh.jpg/800px-Irises-Vincent_van_Gogh.jpg",
+    "Lilac Irises": "https://www.artchive.com/wp-content/uploads/2024/04/lilac-irisesclaude-monet-1914-1917.jpg",
+    "Sunflowers": "https://upload.wikimedia.org/wikipedia/commons/4/46/Vincent_Willem_van_Gogh_127.jpg",
+    "Wheat Field with Cypresses": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Wheat-Field-with-Cypresses-%281889%29-Vincent-van-Gogh-Met.jpg",
+    "Monet's Garden in Giverny": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Monet_-_Monets_Garten_in_Giverny.jpg",
+    "The School of Athens": "https://upload.wikimedia.org/wikipedia/commons/4/49/%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg",
 }
 
 # --------------------------------------------------------------------------- #
@@ -151,7 +156,9 @@ def main(json_path="artworks.json"):
 
     for artwork in tqdm(artworks, unit="artwork"):
         title = artwork["title"]
-        out_path = pathlib.Path("." + artwork["image"])  # strip leading slash
+        # Output to artworks-original directory instead of artworks
+        image_path = artwork["image"].replace("/images/artworks/", "/images/artworks-original/")
+        out_path = pathlib.Path("." + image_path)  # strip leading slash
 
         # Check if we have a direct URL first
         if title in DIRECT_IMAGE_URLS:
