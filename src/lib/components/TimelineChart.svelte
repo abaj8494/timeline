@@ -184,7 +184,7 @@
         // Use the smaller scale to ensure everything fits
         const fitScale = Math.min(scaleX, scaleY) * 0.95; // 0.95 for a bit of padding
         
-        currentScale = Math.max(0.1, Math.min(5, fitScale));
+        currentScale = Math.max(0.1, Math.min(50, fitScale));
         content.style.transform = `scale(${currentScale})`;
         content.style.transformOrigin = 'top left';
         
@@ -253,7 +253,7 @@
     const zoomSpeed = 0.0003; // Reduced from 0.001 for smoother zooming
     const delta = -e.deltaY;
     const scaleChange = 1 + (delta * zoomSpeed);
-    const newScale = Math.max(0.1, Math.min(5, currentScale * scaleChange)); // Allow zoom out to 0.1x, zoom in to 5x
+    const newScale = Math.max(0.1, Math.min(50, currentScale * scaleChange)); // Allow zoom out to 0.1x, zoom in to 50x
     
     if (newScale === currentScale) return; // No change
     
@@ -307,7 +307,7 @@
       e.preventDefault();
       const currentDistance = getTouchDistance(e.touches);
       const scaleChange = currentDistance / touchStartDistance;
-      const newScale = Math.max(0.1, Math.min(5, initialScale * scaleChange)); // Allow zoom out to 0.1x, zoom in to 5x
+      const newScale = Math.max(0.1, Math.min(50, initialScale * scaleChange)); // Allow zoom out to 0.1x, zoom in to 50x
       currentScale = newScale;
       
       // Apply scale transform to the SVG content

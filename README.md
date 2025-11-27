@@ -23,7 +23,46 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 - Improved touch event handling for better mobile UX
 
 
-# list of all people in the timeline:
+# Books
+
+| Title | Author | Published |
+|-------|--------|-----------|
+| Plato's Dialogues | Plato | 380 BC |
+| Shakespeare's First Folio | William Shakespeare | 1623 |
+| How to Win Friends and Influence People | Dale Carnegie | 1936 |
+| A Brief History of Time | Stephen Hawking | 1988 |
+| Sapiens: A Brief History of Humankind | Yuval Noah Harari | 2011 |
+| Thinking Fast and Slow | Daniel Kahneman | 2011 |
+| Deep Work | Cal Newport | 2016 |
+| Ikigai | Héctor García and Francesc Miralles | 2016 |
+| Why We Sleep | Matthew Walker | 2017 |
+
+# Artworks
+
+| Title | Artist | Created |
+|-------|--------|---------|
+| Vitruvian Man | Leonardo da Vinci | 1490 |
+| The School of Athens | Raphael | 1511 |
+| Sistine Chapel Ceiling | Michelangelo | 1512 |
+| Basket of Fruit | Caravaggio | 1599 |
+| David with the Head of Goliath | Caravaggio | 1610 |
+| Girl with a Pearl Earring | Johannes Vermeer | 1665 |
+| Liberty Leading the People | Eugène Delacroix | 1830 |
+| The Great Wave off Kanagawa | Katsushika Hokusai | 1831 |
+| Ophelia | John Everett Millais | 1852 |
+| Irises | Vincent van Gogh | 1889 |
+| Wheat Field with Cypresses | Vincent van Gogh | 1889 |
+| Sunflowers | Vincent van Gogh | 1889 |
+| The Water Lily Pond | Claude Monet | 1899 |
+| Monet's Garden in Giverny | Claude Monet | 1900 |
+| Lilac Irises | Claude Monet | 1916 |
+| The Disquieting Muses | Giorgio de Chirico | 1918 |
+| Self-Portrait with Thorn Necklace and Hummingbird | Frida Kahlo | 1940 |
+| Nighthawks | Edward Hopper | 1942 |
+
+# People
+
+## List of all people in the timeline:
 
 | Name | Born | Died |
 |------|------|------|
@@ -128,3 +167,6 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 | Steve Jobs | 1955 | 2011 |
 | Michael Jackson | 1958 | 2009 |
 | Princess Diana | 1961 | 1997 |
+
+
+# list of books:
