@@ -174,11 +174,26 @@
   onMount(() => {
     container = document.querySelector('.timeline-container');
     if (container) {
-      // Initial scroll position to show a more central part of the timeline
-      // Start around year 0 to 1000 for better initial viewing
-      const centerYear = 500; // Show around 500 AD as a good central point
-      const initialScrollX = Math.max(0, yearToX(centerYear) - (container.clientWidth / 2));
-      container.scrollLeft = initialScrollX;
+      // Calculate initial zoom to fit the entire timeline on screen
+      const content = container.querySelector('.timeline-content');
+      if (content) {
+        // Calculate scale needed to fit width
+        const scaleX = container.clientWidth / width;
+        // Calculate scale needed to fit height
+        const scaleY = container.clientHeight / height;
+        // Use the smaller scale to ensure everything fits
+        const fitScale = Math.min(scaleX, scaleY) * 0.95; // 0.95 for a bit of padding
+        
+        currentScale = Math.max(0.1, Math.min(5, fitScale));
+        content.style.transform = `scale(${currentScale})`;
+        content.style.transformOrigin = 'top left';
+        
+        // Center the timeline horizontally and vertically
+        const scaledWidth = width * currentScale;
+        const scaledHeight = height * currentScale;
+        container.scrollLeft = Math.max(0, (scaledWidth - container.clientWidth) / 2);
+        container.scrollTop = Math.max(0, (scaledHeight - container.clientHeight) / 2);
+      }
     }
   });
   
@@ -235,10 +250,10 @@
   function handleWheel(e) {
     e.preventDefault();
     
-    const zoomSpeed = 0.001;
+    const zoomSpeed = 0.0003; // Reduced from 0.001 for smoother zooming
     const delta = -e.deltaY;
     const scaleChange = 1 + (delta * zoomSpeed);
-    const newScale = Math.max(1, Math.min(3, currentScale * scaleChange)); // Min scale 1 to prevent grey border
+    const newScale = Math.max(0.1, Math.min(5, currentScale * scaleChange)); // Allow zoom out to 0.1x, zoom in to 5x
     
     if (newScale === currentScale) return; // No change
     
@@ -292,7 +307,7 @@
       e.preventDefault();
       const currentDistance = getTouchDistance(e.touches);
       const scaleChange = currentDistance / touchStartDistance;
-      const newScale = Math.max(1, Math.min(3, initialScale * scaleChange)); // Min scale 1 to prevent grey border
+      const newScale = Math.max(0.1, Math.min(5, initialScale * scaleChange)); // Allow zoom out to 0.1x, zoom in to 5x
       currentScale = newScale;
       
       // Apply scale transform to the SVG content
