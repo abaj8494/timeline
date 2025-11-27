@@ -1,9 +1,9 @@
-# robots.txt for Shrine Timeline
+# robots.txt for Timeline
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://yourdomain.com/shrine/sitemap.xml
+Sitemap: https://yourdomain.com/timeline/sitemap.xml
 
 # Disallow crawling of admin or private areas (if any)
 # Disallow: /admin/
