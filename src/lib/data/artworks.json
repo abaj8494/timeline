@@ -91,6 +91,13 @@
     "image": "/images/artworks/giverny-garden.jpg"
   },
   {
+    "id": "vienna-opera",
+    "title": "Vienna Opera",
+    "artist": "Adolf Hitler",
+    "created": 1912,
+    "image": "/images/artworks/vienna-opera.jpg"
+  },
+  {
     "id": "lilac-irises",
     "title": "Lilac Irises",
     "artist": "Claude Monet",

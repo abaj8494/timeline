@@ -1,29 +1,8 @@
-Since I became a thinker circa. 2020, I have wished to construct some sort of visualised timeline of the greatest thinkers, books, and artworks throughout history.
-
-This site is built in Svelte. Svelte is simple and fast. I also want to learn Svelte.
+The scope of this project has widened from being just a shrine of books and people to now being a dart-board for all things that belong on a time-line. 
 
 [https://abaj8494.github.io/timeline/](https://abaj8494.github.io/timeline/)
 
-## Changelog
-
-### Version 1.0.3 (2025-11-27)
-
-**Added:**
-- Added Fibonacci (1170-1250) to the timeline
-- Added Andrey Kolmogorov (1903-1987) to the timeline
-- Implemented pinch-to-zoom functionality for mobile devices (0.5x to 3x zoom range)
-
-**Fixed:**
-- Fixed book titles overlapping on timeline with dynamic spacing based on title length
-- Fixed popup staying fixed in viewport during panning operations
-- Improved mobile zoom experience with explicit viewport settings
-
-**Changed:**
-- Enhanced overlap detection algorithm to prevent text collisions
-- Improved touch event handling for better mobile UX
-
-
-# Books
+# da books
 
 | Title | Author | Published |
 |-------|--------|-----------|
@@ -37,7 +16,7 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 | Ikigai | Héctor García and Francesc Miralles | 2016 |
 | Why We Sleep | Matthew Walker | 2017 |
 
-# Artworks
+# hitler was an artist; did you know?
 
 | Title | Artist | Created |
 |-------|--------|---------|
@@ -55,14 +34,14 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 | Sunflowers | Vincent van Gogh | 1889 |
 | The Water Lily Pond | Claude Monet | 1899 |
 | Monet's Garden in Giverny | Claude Monet | 1900 |
+| Vienna Opera | Adolf Hitler | 1912 |
 | Lilac Irises | Claude Monet | 1916 |
 | The Disquieting Muses | Giorgio de Chirico | 1918 |
 | Self-Portrait with Thorn Necklace and Hummingbird | Frida Kahlo | 1940 |
 | Nighthawks | Edward Hopper | 1942 |
 
-# People
-
-## List of all people in the timeline:
+# degno di nota;
+> antiquitas saeculi juventus mundi; ancient times were [once] the youth of the world -- bacon
 
 | Name | Born | Died |
 |------|------|------|
@@ -168,5 +147,3 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 | Michael Jackson | 1958 | 2009 |
 | Princess Diana | 1961 | 1997 |
 
-
-# list of books:
