@@ -48,10 +48,11 @@ ARTWORK_OVERRIDES = {
     "Vitruvian Man": "Vitruvian Man",
 }
 
-# Direct image URLs for artworks that can't be found via Wikidata
+# Direct image URLs for artworks that can't be found via Wikidata or need specific versions
 DIRECT_IMAGE_URLS = {
-    "David with the Head of Goliath": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/David_with_the_Head_of_Goliath-Caravaggio_%281610%29.jpg/800px-David_with_the_Head_of_Goliath-Caravaggio_%281610%29.jpg",
-    "Self-Portrait with Thorn Necklace and Hummingbird": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Self-portrait_with_necklace.jpg/600px-Self-portrait_with_necklace.jpg",
+    "David with the Head of Goliath": "https://www.wikiart.org/en/caravaggio/david-with-the-head-of-goliath-1610/@@images/image/large",
+    "Self-Portrait with Thorn Necklace and Hummingbird": "https://www.wikiart.org/en/frida-kahlo/self-portrait-with-thorn-necklace-and-hummingbird-1940/@@images/image/large",
+    "The Disquieting Muses": "https://media.tate.org.uk/art/images/work/T/T00/T00900_10.jpg",
     "Irises": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Irises-Vincent_van_Gogh.jpg/800px-Irises-Vincent_van_Gogh.jpg",
 }
 
