@@ -1,8 +1,8 @@
-Since I became a thinker circa. 2020, I have wished to construct some sort of visualised timeline of the greatest thinkers that have lived.
+Since I became a thinker circa. 2020, I have wished to construct some sort of visualised timeline of the greatest thinkers, books, and artworks throughout history.
 
 This site is built in Svelte. Svelte is simple and fast. I also want to learn Svelte.
 
-[https://abaj8494.github.io/shrine/](https://abaj8494.github.io/shrine/)
+[https://abaj8494.github.io/timeline/](https://abaj8494.github.io/timeline/)
 
 ## Changelog
 
@@ -23,7 +23,7 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 - Improved touch event handling for better mobile UX
 
 
-# list of all people in the shrine:
+# list of all people in the timeline:
 
 | Name | Born | Died |
 |------|------|------|

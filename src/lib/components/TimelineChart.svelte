@@ -5,13 +5,15 @@
   export let items: {
     id: string;
     name?: string;         // for people
-    title?: string;        // for books
+    title?: string;        // for books and artworks
     born?: number;         // for people
     died?: number;         // for people
     published?: number;    // for books
+    created?: number;      // for artworks
     image: string;
     gender?: number;       // for people
     author?: string;       // for books
+    artist?: string;       // for artworks
   }[];
 
   // Constants for visualization
@@ -26,14 +28,22 @@
   const MAX_BARS_PER_SIDE = 25; // Increased from 20 to allow more rows
   const DOT_RADIUS = 6; // New constant for book dots
   
-  // Helper to determine if an item is a book or a person
+  // Helper to determine if an item is a book, artwork, or person
   function isBook(item) {
     return item.title !== undefined && item.published !== undefined;
   }
   
+  function isArtwork(item) {
+    return item.title !== undefined && item.created !== undefined;
+  }
+  
+  function isDot(item) {
+    return isBook(item) || isArtwork(item);
+  }
+  
   // Calculate the earliest and latest years in the dataset
-  $: earliestYear = Math.floor(Math.min(...items.map(p => p.born || p.published || 0)) / 100) * 100 - 100;
-  $: latestYear = Math.ceil(Math.max(...items.map(p => p.died || new Date().getFullYear() || 0)) / 100) * 100;
+  $: earliestYear = Math.floor(Math.min(...items.map(p => p.born || p.published || p.created || 0)) / 100) * 100 - 100;
+  $: latestYear = Math.ceil(Math.max(...items.map(p => p.died || p.created || p.published || new Date().getFullYear() || 0)) / 100) * 100;
   
   // Calculate total width based on year span
   $: width = (latestYear - earliestYear) * YEAR_PIXEL_RATIO + (PADDING * 2);
@@ -41,9 +51,9 @@
   // Calculate total height with additional padding
   $: height = TIMELINE_Y + (PADDING * 3) + (MAX_BARS_PER_SIDE * 2) * (BAR_HEIGHT + BAR_GAP);
   
-  // Sort by birth/publication year
+  // Sort by birth/publication/creation year
   $: sorted = [...items].sort((a, b) => 
-    (a.born || a.published || 0) - (b.born || b.published || 0)
+    (a.born || a.published || a.created || 0) - (b.born || b.published || b.created || 0)
   );
   
   // Function to convert year to x position
@@ -84,14 +94,14 @@
     function assignRows(peopleList) {
       // Sort by birth year first
       peopleList.sort((a, b) => 
-        (a.born || a.published || 0) - (b.born || b.published || 0)
+        (a.born || a.published || a.created || 0) - (b.born || b.published || b.created || 0)
       );
       
       // For each person, find the first available row that doesn't overlap
       for (let i = 0; i < peopleList.length; i++) {
         const person = peopleList[i];
-        const personStart = person.born || person.published || 0;
-        const personEnd = person.died || new Date().getFullYear();
+        const personStart = person.born || person.published || person.created || 0;
+        const personEnd = person.died || person.created || person.published || new Date().getFullYear();
         
         // Start checking from row 1
         let rowAssigned = false;
@@ -102,11 +112,11 @@
           const hasOverlap = peopleList.some((p, idx) => {
             if (idx >= i || p.row !== currentRow) return false; // Only check people already assigned to this row
             
-            const pStart = p.born || p.published || 0;
-            const pEnd = p.died || new Date().getFullYear();
+            const pStart = p.born || p.published || p.created || 0;
+            const pEnd = p.died || p.created || p.published || new Date().getFullYear();
             
-            // For books (dots), we check both time proximity and title length
-            if (isBook(person) && isBook(p)) {
+            // For books and artworks (dots), we check both time proximity and title length
+            if (isDot(person) && isDot(p)) {
               // Estimate text width: roughly 6 pixels per character for font-size 11px
               const personTitleWidth = (person.title?.length || 0) * 6;
               const pTitleWidth = (p.title?.length || 0) * 6;
@@ -480,12 +490,14 @@
       <!-- Person timelines -->
       {#each sorted as item, index}
         <!-- Calculate positions -->
-        {@const yearValue = item.born || item.published || 0}
+        {@const yearValue = item.born || item.published || item.created || 0}
         {@const isItemBook = isBook(item)}
-        {@const displayName = isItemBook ? item.title : item.name}
+        {@const isItemArtwork = isArtwork(item)}
+        {@const isItemDot = isItemBook || isItemArtwork}
+        {@const displayName = isItemDot ? item.title : item.name}
         
-        {#if isItemBook}
-          <!-- Book representation (blue dot) -->
+        {#if isItemDot}
+          <!-- Book/Artwork representation (dot) -->
           {@const xPos = yearToX(yearValue)}
           
           <!-- Calculate Y position based on placement and row -->
@@ -495,30 +507,37 @@
             ? TIMELINE_Y - BAR_OFFSET - rowOffset - BAR_HEIGHT/2
             : TIMELINE_Y + BAR_OFFSET + rowOffset + BAR_HEIGHT/2}
           
-          <!-- Book dot group with pointer events -->
+          {@const dotColor = isItemArtwork ? '#FF6B9D' : '#4A9EFF'}
+          {@const itemDescription = isItemArtwork 
+            ? `{displayName} by {item.artist}, created {formatYear(yearValue)}`
+            : `{displayName} by {item.author}, published {formatYear(yearValue)}`}
+          
+          <!-- Dot group with pointer events -->
           <g 
             role="button"
             tabindex="0"
-            aria-label="{displayName} by {item.author}, published {formatYear(yearValue)}"
+            aria-label="{itemDescription}"
             on:click={(e) => handleItemClick(item, e)}
             on:keydown={(e) => handleItemKeydown(item, e)}
           >
-            <!-- Book title -->
+            <!-- Title -->
             <text 
               x={xPos} 
               y={yPos + (isTop ? -NAME_OFFSET - 6 : NAME_OFFSET + 6)} 
               text-anchor="middle" 
               class="book-title"
+              style="fill: {isItemArtwork ? '#FF6B9D' : '#4A9EFF'}"
             >
               {displayName}
             </text>
             
-            <!-- Book dot -->
+            <!-- Dot -->
             <circle 
               cx={xPos} 
               cy={yPos} 
               r={DOT_RADIUS} 
               class="book-dot" 
+              style="fill: {dotColor}; stroke: {dotColor}"
             />
             
             <!-- Connecting line to timeline -->
@@ -597,7 +616,10 @@
       <img src={resolveBasePath(selectedPerson.image)} alt={selectedPerson.name || selectedPerson.title} />
       <h4>{selectedPerson.name || selectedPerson.title}</h4>
       <p>
-        {#if selectedPerson.title}
+        {#if selectedPerson.created}
+          {selectedPerson.artist}<br/>
+          {formatYear(selectedPerson.created)}
+        {:else if selectedPerson.published}
           {selectedPerson.author}<br/>
           {formatYear(selectedPerson.published)}
         {:else}

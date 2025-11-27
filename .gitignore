@@ -22,3 +22,7 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Downsampled images (keep local only)
+**/people-downsampled/
+downsample_images.py

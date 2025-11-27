@@ -290,6 +290,7 @@
 <div class="navigation-controls">
   <a href="{base}/people" class="navigation-link" title="People Timeline">👤</a>
   <a href="{base}/books" class="navigation-link" title="Books Timeline">📚</a>
+  <a href="{base}/artworks" class="navigation-link" title="Artworks Timeline">🎨</a>
   <a href="{base}/list" class="navigation-link" title="List View">📋</a>
 </div>
 

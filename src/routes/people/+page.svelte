@@ -13,7 +13,7 @@
   <meta property="og:title" content={data.title} />
   <meta property="og:description" content={data.description} />
   <meta property="og:image" content={data.ogImage} />
-  <meta property="og:url" content="https://yourdomain.com/shrine/people" />
+  <meta property="og:url" content="https://yourdomain.com/timeline/people" />
   <meta name="twitter:title" content={data.title} />
   <meta name="twitter:description" content={data.description} />
   <meta name="twitter:image" content={data.ogImage} />
@@ -85,6 +85,7 @@
 
 <div class="navigation-controls">
   <a href="{base}/books" class="navigation-icon" title="Go to Books Timeline">📚</a>
+  <a href="{base}/artworks" class="navigation-icon" title="Go to Artworks Timeline">🎨</a>
   <a href="{base}/list" class="navigation-icon" title="List View">📋</a>
   <a href="{base}/search" class="navigation-icon" title="Search Timeline">🔍</a>
 </div>

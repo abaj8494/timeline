@@ -3,7 +3,7 @@
 ## Issue: Site stuck on "Redirecting to people page..."
 
 ### The Problem
-When visiting `https://abaj8494.github.io/shrine/`, the page displays "Redirecting to people page..." but never actually redirects.
+When visiting `https://abaj8494.github.io/timeline/`, the page displays "Redirecting to people page..." but never actually redirects.
 
 ### Root Cause
 GitHub Pages uses **Jekyll** by default, which:
@@ -33,10 +33,10 @@ Created a `.nojekyll` file in the `static/` folder, which:
 
 2. **Wait 1-2 minutes** for GitHub Pages to rebuild
 
-3. **Test** your site at https://abaj8494.github.io/shrine/
+3. **Test** your site at https://abaj8494.github.io/timeline/
 
 ### Expected Result
-✅ Site loads immediately at https://abaj8494.github.io/shrine/people  
+✅ Site loads immediately at https://abaj8494.github.io/timeline/people  
 ✅ You can click and drag to pan the timeline  
 ✅ Clicking on people/books shows their details  
 ✅ All navigation works properly
@@ -58,7 +58,7 @@ Created a `.nojekyll` file in the `static/` folder, which:
 
 **Solution:** 
 1. Verify `.nojekyll` exists in `docs/` folder
-2. Check that `base: '/shrine'` in `svelte.config.js` matches your repo name
+2. Check that `base: '/timeline'` in `svelte.config.js` matches your repo name
 3. Ensure all files in `docs/` are committed and pushed
 
 ### Issue: Changes not appearing after push
@@ -81,7 +81,7 @@ Created a `.nojekyll` file in the `static/` folder, which:
 **Solution:**
 1. Add `.nojekyll` to `static/` folder
 2. Rebuild with `npm run build`
-3. Verify `base: '/shrine'` matches your repository name
+3. Verify `base: '/timeline'` matches your repository name
 
 ## Verification Checklist
 
@@ -89,7 +89,7 @@ After pushing your changes, verify:
 - [ ] `.nojekyll` file exists in both `static/` and `docs/` folders
 - [ ] `docs/` folder is committed and pushed to main branch
 - [ ] GitHub Pages settings point to "Deploy from a branch" → main → `/docs`
-- [ ] Site loads at https://abaj8494.github.io/shrine/
+- [ ] Site loads at https://abaj8494.github.io/timeline/
 - [ ] Timeline is interactive (can click and drag)
 - [ ] Clicking on people/books shows popups
 - [ ] Navigation between pages works

@@ -304,6 +304,7 @@
 <div class="navigation-controls">
   <a href="{base}/people" class="navigation-icon" title="Timeline View">🌌</a>
   <a href="{base}/books" class="navigation-icon" title="Books">📚</a>
+  <a href="{base}/artworks" class="navigation-icon" title="Artworks">🎨</a>
   <a href="{base}/search" class="navigation-icon" title="Search">🔍</a>
 </div>
 

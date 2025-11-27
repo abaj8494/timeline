@@ -12,13 +12,13 @@ export default {
       strict: true
     }),
     paths: {
-      base: dev ? '' : '/shrine'
+      base: dev ? '' : '/timeline'
     },
     prerender: {
       handleHttpError: ({ path, referrer, message }) => {
         // Allow 404 errors for static assets (with or without base path)
         if (path.startsWith('/images/') || path.startsWith('/icons/') || 
-            path.startsWith('/shrine/images/') || path.startsWith('/shrine/icons/')) {
+            path.startsWith('/timeline/images/') || path.startsWith('/timeline/icons/')) {
           console.warn(`[Warning] Missing static asset: ${path} (referenced from ${referrer})`);
           return;
         }
