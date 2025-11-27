@@ -233,24 +233,42 @@
   
   // Mouse wheel zoom handler
   function handleWheel(e) {
-    // Check if user is holding Ctrl/Cmd (standard zoom modifier)
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
-      
-      const zoomSpeed = 0.001;
-      const delta = -e.deltaY;
-      const scaleChange = 1 + (delta * zoomSpeed);
-      const newScale = Math.max(0.5, Math.min(3, currentScale * scaleChange));
-      
-      currentScale = newScale;
-      
-      // Apply scale transform to the SVG content
-      const content = container?.querySelector('.timeline-content');
-      if (content) {
-        content.style.transform = `scale(${currentScale})`;
-        content.style.transformOrigin = 'center center';
-      }
+    e.preventDefault();
+    
+    const zoomSpeed = 0.001;
+    const delta = -e.deltaY;
+    const scaleChange = 1 + (delta * zoomSpeed);
+    const newScale = Math.max(1, Math.min(3, currentScale * scaleChange)); // Min scale 1 to prevent grey border
+    
+    if (newScale === currentScale) return; // No change
+    
+    // Get mouse position relative to container
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Get current scroll position
+    const scrollX = container.scrollLeft;
+    const scrollY = container.scrollTop;
+    
+    // Calculate mouse position relative to content (accounting for current scale)
+    const contentX = (scrollX + mouseX) / currentScale;
+    const contentY = (scrollY + mouseY) / currentScale;
+    
+    // Update scale
+    currentScale = newScale;
+    
+    // Apply scale transform to the SVG content
+    const content = container?.querySelector('.timeline-content');
+    if (content) {
+      content.style.transform = `scale(${currentScale})`;
+      content.style.transformOrigin = 'top left';
     }
+    
+    // Adjust scroll position to keep mouse position fixed
+    // New scroll position = (content position * new scale) - mouse offset
+    container.scrollLeft = (contentX * newScale) - mouseX;
+    container.scrollTop = (contentY * newScale) - mouseY;
   }
   
   // Touch event handlers for mobile pinch-to-zoom
@@ -274,14 +292,14 @@
       e.preventDefault();
       const currentDistance = getTouchDistance(e.touches);
       const scaleChange = currentDistance / touchStartDistance;
-      const newScale = Math.max(0.5, Math.min(3, initialScale * scaleChange));
+      const newScale = Math.max(1, Math.min(3, initialScale * scaleChange)); // Min scale 1 to prevent grey border
       currentScale = newScale;
       
       // Apply scale transform to the SVG content
       const content = container?.querySelector('.timeline-content');
       if (content) {
         content.style.transform = `scale(${currentScale})`;
-        content.style.transformOrigin = 'center center';
+        content.style.transformOrigin = 'top left';
       }
     }
   }
@@ -345,7 +363,7 @@
   .timeline-container {
     width: 100%;
     height: 100vh;
-    background-color: #1C1E21;
+    background-color: #17191C; /* Match SVG background to hide border */
     position: relative;
     overflow: auto;
     cursor: grab;
@@ -358,8 +376,6 @@
   
   .timeline-content {
     position: relative;
-    min-width: 100%;
-    width: max-content;
     transition: transform 0.1s ease-out;
   }
   
@@ -467,7 +483,7 @@
 <div 
   class="timeline-container"
   role="application"
-  aria-label="Interactive timeline visualization - click and drag to pan, hold Ctrl/Cmd and scroll to zoom, pinch to zoom on mobile"
+  aria-label="Interactive timeline visualization - click and drag to pan, scroll to zoom, pinch to zoom on mobile"
   on:mousedown={handleMouseDown}
   on:mousemove={handleMouseMove}
   on:mouseup={handleMouseUp}
@@ -477,7 +493,7 @@
   on:touchmove={handleTouchMove}
   on:touchend={handleTouchEnd}
 >
-  <div class="timeline-content" style="width: {width}px; height: {height}px;">
+  <div class="timeline-content" style="width: {width * currentScale}px; height: {height * currentScale}px;">
     <svg width={width} height={height}>
       <!-- Background -->
       <rect x="0" y="0" width={width} height={height} fill="#17191C" />
