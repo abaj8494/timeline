@@ -24,5 +24,6 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Downsampled images (keep local only)
-**/people-downsampled/
+**/people-original/
+**/artworks-original/
 downsample_images.py
