@@ -105,9 +105,18 @@
             const pStart = p.born || p.published || 0;
             const pEnd = p.died || new Date().getFullYear();
             
-            // For books (dots), we only check if they're close to each other in time
+            // For books (dots), we check both time proximity and title length
             if (isBook(person) && isBook(p)) {
-              return Math.abs(personStart - pStart) < 30; // Dots should have at least 30 years distance
+              // Estimate text width: roughly 6 pixels per character for font-size 11px
+              const personTitleWidth = (person.title?.length || 0) * 6;
+              const pTitleWidth = (p.title?.length || 0) * 6;
+              const maxTitleWidth = Math.max(personTitleWidth, pTitleWidth);
+              
+              // Calculate required year distance based on title width
+              // More pixels needed = more years of separation needed
+              const requiredYearDistance = Math.max(50, maxTitleWidth / YEAR_PIXEL_RATIO);
+              
+              return Math.abs(personStart - pStart) < requiredYearDistance;
             }
             
             // For people (bars), or book-person combinations
@@ -146,6 +155,11 @@
   let scrollTop = 0;
   let container;
   
+  // Touch/zoom state
+  let touchStartDistance = 0;
+  let initialScale = 1;
+  let currentScale = 1;
+  
   // Initialize when mounted
   onMount(() => {
     container = document.querySelector('.timeline-container');
@@ -163,6 +177,11 @@
     // Don't start panning if clicking on interactive elements
     if (e.target.closest('.person-bar, .book-dot, .person-name, .book-title, .image-popup')) {
       return;
+    }
+    
+    // Close popup when clicking on background to start panning
+    if (selectedPerson) {
+      selectedPerson = null;
     }
     
     isPanning = true;
@@ -199,6 +218,45 @@
       if (container) {
         container.style.cursor = 'grab';
       }
+    }
+  }
+  
+  // Touch event handlers for mobile pinch-to-zoom
+  function getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  
+  function handleTouchStart(e) {
+    if (e.touches.length === 2) {
+      // Two-finger touch for pinch-to-zoom
+      e.preventDefault();
+      touchStartDistance = getTouchDistance(e.touches);
+      initialScale = currentScale;
+    }
+  }
+  
+  function handleTouchMove(e) {
+    if (e.touches.length === 2 && touchStartDistance > 0) {
+      e.preventDefault();
+      const currentDistance = getTouchDistance(e.touches);
+      const scaleChange = currentDistance / touchStartDistance;
+      const newScale = Math.max(0.5, Math.min(3, initialScale * scaleChange));
+      currentScale = newScale;
+      
+      // Apply scale transform to the SVG content
+      const content = container?.querySelector('.timeline-content');
+      if (content) {
+        content.style.transform = `scale(${currentScale})`;
+        content.style.transformOrigin = 'center center';
+      }
+    }
+  }
+  
+  function handleTouchEnd(e) {
+    if (e.touches.length < 2) {
+      touchStartDistance = 0;
     }
   }
   
@@ -270,6 +328,7 @@
     position: relative;
     min-width: 100%;
     width: max-content;
+    transition: transform 0.1s ease-out;
   }
   
   svg {
@@ -376,11 +435,14 @@
 <div 
   class="timeline-container"
   role="application"
-  aria-label="Interactive timeline visualization - click and drag to pan"
+  aria-label="Interactive timeline visualization - click and drag to pan, pinch to zoom on mobile"
   on:mousedown={handleMouseDown}
   on:mousemove={handleMouseMove}
   on:mouseup={handleMouseUp}
   on:mouseleave={handleMouseLeave}
+  on:touchstart={handleTouchStart}
+  on:touchmove={handleTouchMove}
+  on:touchend={handleTouchEnd}
 >
   <div class="timeline-content" style="width: {width}px; height: {height}px;">
     <svg width={width} height={height}>

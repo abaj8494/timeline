@@ -168,6 +168,14 @@
     "gender": 1
   },
   {
+    "id": "fibonacci",
+    "name": "Fibonacci",
+    "born": 1170,
+    "died": 1250,
+    "image": "/images/people/fibonacci.jpg",
+    "gender": 1
+  },
+  {
     "id": "dante",
     "name": "Dante Alighieri",
     "born": 1265,
@@ -637,6 +645,14 @@
     "born": 1903,
     "died": 1950,
     "image": "/images/people/orwell.jpg",
+    "gender": 1
+  },
+  {
+    "id": "kolmogorov",
+    "name": "Andrey Kolmogorov",
+    "born": 1903,
+    "died": 1987,
+    "image": "/images/people/kolmogorov.jpg",
     "gender": 1
   },
   {

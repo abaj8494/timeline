@@ -4,6 +4,24 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 
 [https://abaj8494.github.io/shrine/](https://abaj8494.github.io/shrine/)
 
+## Changelog
+
+### Version 1.0.3 (2025-11-27)
+
+**Added:**
+- Added Fibonacci (1170-1250) to the timeline
+- Added Andrey Kolmogorov (1903-1987) to the timeline
+- Implemented pinch-to-zoom functionality for mobile devices (0.5x to 3x zoom range)
+
+**Fixed:**
+- Fixed book titles overlapping on timeline with dynamic spacing based on title length
+- Fixed popup staying fixed in viewport during panning operations
+- Improved mobile zoom experience with explicit viewport settings
+
+**Changed:**
+- Enhanced overlap detection algorithm to prevent text collisions
+- Improved touch event handling for better mobile UX
+
 
 # list of all people in the shrine:
 
@@ -30,6 +48,7 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 | Seneca | 4 BC | 65 |
 | Marcus Aurelius | 121 | 180 |
 | Genghis Khan | 1162 | 1227 |
+| Fibonacci | 1170 | 1250 |
 | Dante Alighieri | 1265 | 1321 |
 | Geoffrey Chaucer | 1343 | 1400 |
 | Johannes Gutenberg | 1400 | 1468 |
@@ -89,6 +108,7 @@ This site is built in Svelte. Svelte is simple and fast. I also want to learn Sv
 | Alfred Tarski | 1901 | 1983 |
 | Mortimer J. Adler | 1902 | 2001 |
 | George Orwell | 1903 | 1950 |
+| Andrey Kolmogorov | 1903 | 1987 |
 | Salvador Dali | 1904 | 1989 |
 | Frida Kahlo | 1907 | 1954 |
 | Mother Teresa | 1910 | 1997 |
