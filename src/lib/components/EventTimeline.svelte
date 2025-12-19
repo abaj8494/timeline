@@ -34,14 +34,14 @@
 	$: timeOffset = minTime < 0 ? Math.abs(minTime) + 1 : 0;
 
 	// Width calculations
-	const BASE_LINEAR_WIDTH = 3000;
-	const BASE_LOG_WIDTH = 2500;
+	const BASE_LINEAR_WIDTH = 4000;
+	const BASE_LOG_WIDTH = 4000;
 
 	$: calculatedWidth =
-		scaleType === 'log' ? BASE_LOG_WIDTH : Math.max(BASE_LINEAR_WIDTH, (maxTime - minTime) * 0.15);
+		scaleType === 'log' ? BASE_LOG_WIDTH : Math.max(BASE_LINEAR_WIDTH, (maxTime - minTime) * 0.2);
 
 	let containerWidth = 0;
-	$: effectiveWidth = Math.max(calculatedWidth, containerWidth / 0.5) + PADDING * 2;
+	$: effectiveWidth = Math.max(calculatedWidth, containerWidth / 0.5) + PADDING * 4;
 
 	// Height calculation
 	$: height = TIMELINE_Y + PADDING * 3 + MAX_BARS_PER_SIDE * 2 * (BAR_HEIGHT + BAR_GAP);
@@ -49,25 +49,40 @@
 	// Sort by start time
 	$: sorted = [...items].sort((a, b) => a.start - b.start);
 
-	// Asinh function for scaling that handles negatives well
+	// Piecewise scale: log for deep time, linear for recent
+	// Breakpoint at Cenozoic era (~66 million years ago)
+	const CENOZOIC_BOUNDARY = -66000000;
+	const ANCIENT_PORTION = 0.25; // 25% of width for ancient (Big Bang to Cenozoic)
+	const RECENT_PORTION = 0.75; // 75% of width for recent (Cenozoic to present)
+
+	// Asinh function for scaling deep time
 	function asinhScale(value: number, compressionFactor: number = 1e9): number {
 		return Math.asinh(value / compressionFactor);
 	}
 
-	// Convert time to x position
+	// Convert time to x position using piecewise scale
 	function timeToX(time: number): number {
 		const usableWidth = effectiveWidth - PADDING * 2;
 
 		if (scaleType === 'log') {
-			// Use asinh scale for better distribution across billions of years
-			const compressionFactor = 1e8;
+			// Piecewise scale: asinh for ancient, linear for recent
+			const ancientWidth = usableWidth * ANCIENT_PORTION;
+			const recentWidth = usableWidth * RECENT_PORTION;
 
-			const scaledMin = asinhScale(minTime, compressionFactor);
-			const scaledMax = asinhScale(maxTime, compressionFactor);
-			const scaledTime = asinhScale(time, compressionFactor);
+			if (time <= CENOZOIC_BOUNDARY) {
+				// Ancient time: use asinh compression
+				const compressionFactor = 1e8;
+				const scaledMin = asinhScale(minTime, compressionFactor);
+				const scaledBoundary = asinhScale(CENOZOIC_BOUNDARY, compressionFactor);
+				const scaledTime = asinhScale(time, compressionFactor);
 
-			const ratio = (scaledTime - scaledMin) / (scaledMax - scaledMin);
-			return PADDING + ratio * usableWidth;
+				const ratio = (scaledTime - scaledMin) / (scaledBoundary - scaledMin);
+				return PADDING + ratio * ancientWidth;
+			} else {
+				// Recent time: use linear scale (more spread out)
+				const ratio = (time - CENOZOIC_BOUNDARY) / (maxTime - CENOZOIC_BOUNDARY);
+				return PADDING + ancientWidth + ratio * recentWidth;
+			}
 		} else {
 			// Linear scale
 			const ratio = (time - minTime) / (maxTime - minTime);
@@ -83,21 +98,31 @@
 		const range = maxTime - minTime;
 
 		if (scaleType === 'log') {
-			// For logarithmic scale, use powers of 10
-			const powers = [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0];
-			for (const p of powers) {
-				const value = Math.pow(10, Math.abs(p)) * (p < 0 ? -1 : 1);
-				if (value >= minTime && value <= maxTime) {
-					markers.push(value);
+			// Piecewise scale: different markers for ancient vs recent
+
+			// Ancient era markers (Big Bang to Cenozoic) - key geological dates
+			const ancientMarkers = [
+				-13800000000, // Big Bang
+				-4500000000, // Solar System
+				-3800000000, // First life
+				-2500000000, // Great Oxidation
+				-541000000, // Cambrian explosion
+				-252000000, // Permian extinction
+				-66000000 // Cenozoic boundary
+			];
+			for (const d of ancientMarkers) {
+				if (d >= minTime && d <= CENOZOIC_BOUNDARY) {
+					markers.push(d);
 				}
 			}
-			// Add some key dates
-			const keyDates = [
-				-13800000000, -4500000000, -1000000000, -100000000, -10000000, -1000000, -100000, -10000,
-				-1000, 0, 1000, 2000
+
+			// Recent era markers (Cenozoic to present) - more frequent
+			const recentMarkers = [
+				-50000000, -20000000, -10000000, -5000000, -2000000, -500000, -100000, -10000, -5000, 0,
+				1000, 2000
 			];
-			for (const d of keyDates) {
-				if (d >= minTime && d <= maxTime && !markers.includes(d)) {
+			for (const d of recentMarkers) {
+				if (d > CENOZOIC_BOUNDARY && d <= maxTime) {
 					markers.push(d);
 				}
 			}
@@ -585,33 +610,38 @@
 	.event-popup {
 		position: fixed;
 		background-color: #23272f;
-		padding: 16px;
-		border-radius: 12px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+		padding: 24px;
+		border-radius: 16px;
+		box-shadow: 0 6px 30px rgba(0, 0, 0, 0.7);
 		z-index: 100;
 		border: 1px solid #444;
-		max-width: 280px;
+		max-width: 420px;
 		transform: translate(-50%, -50%);
+		cursor: auto;
+		user-select: text;
 	}
 
 	.event-popup h4 {
-		margin: 0 0 8px;
+		margin: 0 0 12px;
 		color: #fff;
-		font-size: 1.1rem;
-		padding-right: 24px;
+		font-size: 1.4rem;
+		padding-right: 32px;
+		user-select: text;
 	}
 
 	.event-popup .subtitle {
-		margin: 0 0 12px;
-		font-size: 0.9rem;
+		margin: 0 0 16px;
+		font-size: 1.1rem;
 		color: #ccc;
-		line-height: 1.4;
+		line-height: 1.5;
+		user-select: text;
 	}
 
 	.event-popup .time-label {
-		font-size: 0.85rem;
+		font-size: 1rem;
 		color: #999;
-		margin-bottom: 10px;
+		margin-bottom: 14px;
+		user-select: text;
 	}
 
 	.event-popup .tags {
