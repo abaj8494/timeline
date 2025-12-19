@@ -42,6 +42,18 @@
 						goto(`${base}/people`);
 					}
 					break;
+				case 'c':
+					// Only navigate to cosmic if not already on cosmic page
+					if (!currentPath.includes('/cosmic')) {
+						goto(`${base}/cosmic`);
+					}
+					break;
+				case 'h':
+					// Only navigate to humanity if not already on humanity page
+					if (!currentPath.includes('/humanity')) {
+						goto(`${base}/humanity`);
+					}
+					break;
 			}
 		}
 		

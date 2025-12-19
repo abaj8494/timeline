@@ -1,0 +1,14 @@
+import{d as g,e as k,c as w,a as b,t as $}from"../chunks/CXO4SUQH.js";import{o as T}from"../chunks/UKlZL6Oz.js";import{R as E,h,x as v,ae as A,aG as R,I as _,M as N,aD as S,aC as P,B as C,N as m,w as I,E as O,F as j,v as q,ao as F,p as L,Z as y,a as M,a5 as z,T as D}from"../chunks/CbWlX3Uk.js";import{h as H}from"../chunks/C4GLHgQU.js";import{s as B,a as G}from"../chunks/nWJh_gqa.js";import{s as K,g as l}from"../chunks/OnjENl4k.js";import{b as u}from"../chunks/MrAQXxzP.js";function U(t,i,n=!1,o=!1,f=!1){var a=t,p="";E(()=>{var r=A;if(p===(p=i()??"")){h&&v();return}if(r.nodes_start!==null&&(R(r.nodes_start,r.nodes_end),r.nodes_start=r.nodes_end=null),p!==""){if(h){_.data;for(var e=v(),s=e;e!==null&&(e.nodeType!==8||e.data!=="");)s=e,e=N(e);if(e===null)throw S(),P;g(_,s),a=C(e);return}var d=p+"";n?d=`<svg>${d}</svg>`:o&&(d=`<math>${d}</math>`);var c=k(d);if((n||o)&&(c=m(c)),g(m(c),c.lastChild),n||o)for(;m(c);)a.before(m(c));else a.before(c)}})}function W(t,i,...n){var o=t,f=q,a;I(()=>{f!==(f=i())&&(a&&(F(a),a=null),a=j(()=>f(o,...n)))},O),h&&(o=_)}const X=!0,se=Object.freeze(Object.defineProperty({__proto__:null,prerender:X},Symbol.toStringTag,{value:"Module"})),Y=()=>{const t=K;return{page:{subscribe:t.page.subscribe},navigating:{subscribe:t.navigating.subscribe},updated:t.updated}},Z={subscribe(t){return Y().page.subscribe(t)}};var J=$('<meta name="description" content="Explore history through an interactive timeline of influential people, books, and artworks"> <!>',1);function oe(t,i){L(i,!0);const[n,o]=B(),f=()=>G(Z,"$page",n);T(()=>{function r(e){if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;const s=f().url.pathname;switch(e.key.toLowerCase()){case"s":l(`${u}/search`);break;case"b":s.includes("/books")||l(`${u}/books`);break;case"a":s.includes("/artworks")||l(`${u}/artworks`);break;case"l":l(`${u}/list`);break;case"p":s.includes("/people")||l(`${u}/people`);break;case"c":s.includes("/cosmic")||l(`${u}/cosmic`);break;case"h":s.includes("/humanity")||l(`${u}/humanity`);break}}return window.addEventListener("keydown",r),()=>{window.removeEventListener("keydown",r)}});var a=w();H(r=>{var e=J();z.title="Timeline - Interactive Historical Timeline";var s=D(y(e),2);U(s,()=>`<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "WebSite",
+		"name": "Timeline",
+		"description": "An interactive timeline visualization of historical figures, influential books, and famous artworks throughout history",
+		"url": "https://yourdomain.com/timeline/",
+		"potentialAction": {
+			"@type": "SearchAction",
+			"target": "https://yourdomain.com/timeline/search?q={search_term_string}",
+			"query-input": "required name=search_term_string"
+		}
+	}
+	<\/script>`),b(r,e)});var p=y(a);W(p,()=>i.children),b(t,a),M(),o()}export{oe as component,se as universal};

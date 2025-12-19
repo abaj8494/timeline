@@ -4,11 +4,27 @@
   import { base } from '$app/paths';
   import people from '$lib/data/people.json';
   import books from '$lib/data/books.json';
+  import artworks from '$lib/data/artworks.json';
+  import cosmic from '$lib/data/cosmic.json';
+  import humanity from '$lib/data/humanity.json';
   import { resolveBasePath } from '$lib/utils/paths';
 
   let searchTerm = '';
   let searchResults = [];
   let selectedItem = null;
+
+  // Format time for cosmic/humanity events
+  function formatTime(time: number): string {
+    const absTime = Math.abs(time);
+    if (absTime >= 1000000000) {
+      return `${(time / 1000000000).toFixed(1)} Ga`;
+    } else if (absTime >= 1000000) {
+      return `${(time / 1000000).toFixed(1)} Ma`;
+    } else if (time < 0) {
+      return `${Math.abs(time)} BC`;
+    }
+    return `${time} AD`;
+  }
 
   // Combined search function
   $: if (searchTerm.trim()) {
@@ -42,8 +58,51 @@
         dateRange: `${book.published} • ${book.author}`
       }));
 
+    // Search artworks
+    const foundArtworks = artworks
+      .filter(artwork => 
+        artwork.title.toLowerCase().includes(term) ||
+        artwork.artist.toLowerCase().includes(term) ||
+        (artwork.created && artwork.created.toString().includes(term))
+      )
+      .map(artwork => ({
+        ...artwork,
+        type: 'artwork',
+        displayName: artwork.title,
+        dateRange: `${artwork.created} • ${artwork.artist}`
+      }));
+
+    // Search cosmic
+    const foundCosmic = cosmic
+      .filter(event => 
+        event.title.toLowerCase().includes(term) ||
+        (event.subtitle && event.subtitle.toLowerCase().includes(term)) ||
+        (event.tags && event.tags.some(tag => tag.toLowerCase().includes(term)))
+      )
+      .map(event => ({
+        ...event,
+        type: 'cosmic',
+        displayName: event.title,
+        dateRange: event.labelTime || formatTime(event.start)
+      }));
+
+    // Search humanity
+    const foundHumanity = humanity
+      .filter(event => 
+        event.title.toLowerCase().includes(term) ||
+        (event.subtitle && event.subtitle.toLowerCase().includes(term)) ||
+        (event.tags && event.tags.some(tag => tag.toLowerCase().includes(term))) ||
+        (event.region && event.region.toLowerCase().includes(term))
+      )
+      .map(event => ({
+        ...event,
+        type: 'humanity',
+        displayName: event.title,
+        dateRange: event.region ? `${formatTime(event.start)} • ${event.region}` : formatTime(event.start)
+      }));
+
     // Combine and sort by relevance (name matches first, then date matches)
-    searchResults = [...foundPeople, ...foundBooks].sort((a, b) => {
+    searchResults = [...foundPeople, ...foundBooks, ...foundArtworks, ...foundCosmic, ...foundHumanity].sort((a, b) => {
       const aNameMatch = a.displayName.toLowerCase().includes(term);
       const bNameMatch = b.displayName.toLowerCase().includes(term);
       
@@ -51,8 +110,8 @@
       if (!aNameMatch && bNameMatch) return 1;
       
       // If both match name or both don't, sort by date
-      const aDate = a.born || a.published || 0;
-      const bDate = b.born || b.published || 0;
+      const aDate = a.born || a.published || a.created || a.start || 0;
+      const bDate = b.born || b.published || b.created || b.start || 0;
       return aDate - bDate;
     });
   } else {
@@ -64,11 +123,14 @@
   }
 
   function goToTimeline(type) {
-    if (type === 'person') {
-      window.location.href = `${base}/people`;
-    } else {
-      window.location.href = `${base}/books`;
-    }
+    const routes = {
+      person: `${base}/people`,
+      book: `${base}/books`,
+      artwork: `${base}/artworks`,
+      cosmic: `${base}/cosmic`,
+      humanity: `${base}/humanity`
+    };
+    window.location.href = routes[type] || `${base}/`;
   }
 
   onMount(() => {
@@ -203,6 +265,18 @@
     background-color: #58B5F3;
   }
 
+  .result-type.artwork {
+    background-color: #EC4899;
+  }
+
+  .result-type.cosmic {
+    background-color: #06B6D4;
+  }
+
+  .result-type.humanity {
+    background-color: #F59E0B;
+  }
+
   .result-date {
     color: #999;
     font-size: 0.9rem;
@@ -321,6 +395,8 @@
 </style>
 
 <div class="navigation-controls">
+  <a href="{base}/cosmic" class="navigation-link" title="Cosmic Timeline">🌌</a>
+  <a href="{base}/humanity" class="navigation-link" title="Humanity Timeline">🌍</a>
   <a href="{base}/people" class="navigation-link" title="People Timeline">👤</a>
   <a href="{base}/books" class="navigation-link" title="Books Timeline">📚</a>
   <a href="{base}/artworks" class="navigation-link" title="Artworks Timeline">🎨</a>
@@ -330,7 +406,7 @@
 <div class="search-page">
   <div class="header">
     <h1 class="title">Search Timeline</h1>
-    <p class="subtitle">Find people and books across history</p>
+    <p class="subtitle">Find people, books, artworks, and events across history</p>
   </div>
 
   <div class="search-container">
@@ -363,7 +439,13 @@
             >
               <div class="result-header">
                 <div class="result-name">{item.displayName}</div>
-                <div class="result-type" class:book={item.type === 'book'}>
+                <div 
+                  class="result-type" 
+                  class:book={item.type === 'book'}
+                  class:artwork={item.type === 'artwork'}
+                  class:cosmic={item.type === 'cosmic'}
+                  class:humanity={item.type === 'humanity'}
+                >
                   {item.type}
                 </div>
               </div>
@@ -374,11 +456,13 @@
 
         <div class="detail-panel">
           {#if selectedItem}
-            <img 
-              src={resolveBasePath(selectedItem.image)} 
-              alt={selectedItem.displayName}
-              class="detail-image"
-            />
+            {#if selectedItem.image}
+              <img 
+                src={resolveBasePath(selectedItem.image)} 
+                alt={selectedItem.displayName}
+                class="detail-image"
+              />
+            {/if}
             <div class="detail-name">{selectedItem.displayName}</div>
             <div class="detail-info">
               {#if selectedItem.type === 'person'}
@@ -386,9 +470,23 @@
                 {#if selectedItem.died && selectedItem.born}
                   <br/>({selectedItem.died - selectedItem.born} years old)
                 {/if}
-              {:else}
+              {:else if selectedItem.type === 'book'}
                 Published: {selectedItem.published}<br/>
                 Author: {selectedItem.author}
+              {:else if selectedItem.type === 'artwork'}
+                Created: {selectedItem.created}<br/>
+                Artist: {selectedItem.artist}
+              {:else if selectedItem.type === 'cosmic' || selectedItem.type === 'humanity'}
+                {selectedItem.labelTime || formatTime(selectedItem.start)}
+                {#if selectedItem.subtitle}
+                  <br/><span style="color: #ccc; font-size: 0.9rem;">{selectedItem.subtitle}</span>
+                {/if}
+                {#if selectedItem.region}
+                  <br/><span style="color: #888;">{selectedItem.region}</span>
+                {/if}
+                {#if selectedItem.tags && selectedItem.tags.length > 0}
+                  <br/><span style="color: #FA6742; font-size: 0.85rem;">{selectedItem.tags.join(', ')}</span>
+                {/if}
               {/if}
             </div>
             <button 

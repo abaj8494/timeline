@@ -169,16 +169,24 @@
   let touchStartDistance = 0;
   let initialScale = 1;
   let currentScale = 1;
+  let containerWidth = 0;
+  let containerHeight = 0;
+  
+  // Calculate minimum width to fill viewport
+  $: effectiveWidth = Math.max(width, containerWidth / 0.5); // Ensure timeline is at least 2x viewport when zoomed out
   
   // Initialize when mounted
   onMount(() => {
     container = document.querySelector('.timeline-container');
     if (container) {
+      containerWidth = container.clientWidth;
+      containerHeight = container.clientHeight;
+      
       // Calculate initial zoom to fit the entire timeline on screen
       const content = container.querySelector('.timeline-content');
       if (content) {
         // Calculate scale needed to fit width
-        const scaleX = container.clientWidth / width;
+        const scaleX = container.clientWidth / effectiveWidth;
         // Calculate scale needed to fit height
         const scaleY = container.clientHeight / height;
         // Use the smaller scale to ensure everything fits
@@ -189,7 +197,7 @@
         content.style.transformOrigin = 'top left';
         
         // Center the timeline horizontally and vertically
-        const scaledWidth = width * currentScale;
+        const scaledWidth = effectiveWidth * currentScale;
         const scaledHeight = height * currentScale;
         container.scrollLeft = Math.max(0, (scaledWidth - container.clientWidth) / 2);
         container.scrollTop = Math.max(0, (scaledHeight - container.clientHeight) / 2);
@@ -250,7 +258,7 @@
   function handleWheel(e) {
     e.preventDefault();
     
-    const zoomSpeed = 0.0003; // Reduced from 0.001 for smoother zooming
+    const zoomSpeed = 0.001; // Increased for more responsive zooming
     const delta = -e.deltaY;
     const scaleChange = 1 + (delta * zoomSpeed);
     const newScale = Math.max(0.1, Math.min(50, currentScale * scaleChange)); // Allow zoom out to 0.1x, zoom in to 50x
@@ -508,10 +516,10 @@
   on:touchmove={handleTouchMove}
   on:touchend={handleTouchEnd}
 >
-  <div class="timeline-content" style="width: {width * currentScale}px; height: {height * currentScale}px;">
-    <svg width={width} height={height}>
+  <div class="timeline-content" style="width: {effectiveWidth * currentScale}px; height: {height * currentScale}px;">
+    <svg width={effectiveWidth} height={height}>
       <!-- Background -->
-      <rect x="0" y="0" width={width} height={height} fill="#17191C" />
+      <rect x="0" y="0" width={effectiveWidth} height={height} fill="#17191C" />
       
       <!-- Time markers -->
       {#each timeMarkers as year}
@@ -535,7 +543,7 @@
       <!-- Main timeline -->
       <line 
         x1={PADDING} 
-        y1={TIMELINE_Y} 
+        y1={TIMELINE_Y}  
         x2={width - PADDING} 
         y2={TIMELINE_Y} 
         class="main-timeline" 
