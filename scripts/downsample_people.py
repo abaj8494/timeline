@@ -88,10 +88,33 @@ def main():
         print("No JPG files found in people directory")
         return
     
-    print(f"Found {len(image_files)} images to process\n")
+    # Filter out files that already exist in downsampled directory
+    files_to_process = []
+    skipped_files = []
+    
+    for img_path in image_files:
+        output_path = downsampled_dir / img_path.name
+        if output_path.exists():
+            skipped_files.append(img_path.name)
+        else:
+            files_to_process.append(img_path)
+    
+    print(f"Found {len(image_files)} images total")
+    print(f"Skipping {len(skipped_files)} already downsampled images")
+    print(f"Processing {len(files_to_process)} new images\n")
+    
+    if skipped_files:
+        print("Skipped files:")
+        for name in skipped_files:
+            print(f"  ✓ {name}")
+        print()
+    
+    if not files_to_process:
+        print("No new images to process!")
+        return
     
     # Process each image
-    for img_path in image_files:
+    for img_path in files_to_process:
         output_path = downsampled_dir / img_path.name
         downsample_image(img_path, output_path, target_size_mb=1.0, max_dimension=800)
         print()
@@ -101,16 +124,17 @@ def main():
     print("SUMMARY")
     print("=" * 50)
     
-    total_original = sum(get_file_size_mb(f) for f in image_files)
-    total_downsampled = sum(get_file_size_mb(downsampled_dir / f.name) for f in image_files)
+    total_original = sum(get_file_size_mb(f) for f in files_to_process)
+    total_downsampled = sum(get_file_size_mb(downsampled_dir / f.name) for f in files_to_process)
     
+    print(f"Processed {len(files_to_process)} images")
     print(f"Total original size: {total_original:.2f}MB")
     print(f"Total downsampled size: {total_downsampled:.2f}MB")
     print(f"Total reduction: {((total_original - total_downsampled) / total_original) * 100:.1f}%")
     
     # Check for any files over 1MB
     large_files = []
-    for img_path in image_files:
+    for img_path in files_to_process:
         output_path = downsampled_dir / img_path.name
         size = get_file_size_mb(output_path)
         if size > 1.0:
@@ -121,7 +145,7 @@ def main():
         for name, size in large_files:
             print(f"  {name}: {size:.2f}MB")
     else:
-        print("\n✓ All files are under 1MB!")
+        print("\n✓ All processed files are under 1MB!")
 
 if __name__ == "__main__":
     main()

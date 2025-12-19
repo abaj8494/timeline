@@ -1,0 +1,1 @@
+import{t,a as e}from"../chunks/CB0lZw64.js";import{i}from"../chunks/36iwJYuS.js";import{p as r,o as s,a as m}from"../chunks/EIGgl-ut.js";import{g as n,b as f}from"../chunks/CKmWNKX5.js";var d=t("<div>Redirecting to people page...</div>");function u(o,a){r(a,!1),s(()=>{n(`${f}/people`)}),i();var p=d();e(o,p),m()}export{u as component};

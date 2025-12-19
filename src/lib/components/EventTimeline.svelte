@@ -49,28 +49,36 @@
 	// Sort by start time
 	$: sorted = [...items].sort((a, b) => a.start - b.start);
 
-	// Piecewise scale: log for deep time, linear for recent
-	// Breakpoint at Cenozoic era (~66 million years ago)
-	const CENOZOIC_BOUNDARY = -66000000;
-	const ANCIENT_PORTION = 0.25; // 25% of width for ancient (Big Bang to Cenozoic)
-	const RECENT_PORTION = 0.75; // 75% of width for recent (Cenozoic to present)
+	// 4-piece piecewise scale for cosmic timeline
+	// 1. Ancient: Big Bang to Cenozoic (-66M) - heavily compressed
+	// 2. Middle: Cenozoic to Human era (-2M) - moderately compressed
+	// 3. Human: Human era to Historical (-10k) - lightly compressed
+	// 4. Historical: -10k to present - fully linear
+	const CENOZOIC_BOUNDARY = -66000000; // 66 million years ago
+	const HUMAN_BOUNDARY = -2000000; // 2 million years ago
+	const HISTORICAL_BOUNDARY = -10000; // 10,000 years ago
+	const ANCIENT_PORTION = 0.15; // 15% for Big Bang to Cenozoic
+	const MIDDLE_PORTION = 0.2; // 20% for Cenozoic to Human era
+	const HUMAN_PORTION = 0.3; // 30% for Human era to Historical
+	const HISTORICAL_PORTION = 0.35; // 35% for last 10,000 years
 
 	// Asinh function for scaling deep time
 	function asinhScale(value: number, compressionFactor: number = 1e9): number {
 		return Math.asinh(value / compressionFactor);
 	}
 
-	// Convert time to x position using piecewise scale
+	// Convert time to x position using 4-piece piecewise scale
 	function timeToX(time: number): number {
 		const usableWidth = effectiveWidth - PADDING * 2;
 
 		if (scaleType === 'log') {
-			// Piecewise scale: asinh for ancient, linear for recent
 			const ancientWidth = usableWidth * ANCIENT_PORTION;
-			const recentWidth = usableWidth * RECENT_PORTION;
+			const middleWidth = usableWidth * MIDDLE_PORTION;
+			const humanWidth = usableWidth * HUMAN_PORTION;
+			const historicalWidth = usableWidth * HISTORICAL_PORTION;
 
 			if (time <= CENOZOIC_BOUNDARY) {
-				// Ancient time: use asinh compression
+				// Ancient time (Big Bang to Cenozoic): asinh compression
 				const compressionFactor = 1e8;
 				const scaledMin = asinhScale(minTime, compressionFactor);
 				const scaledBoundary = asinhScale(CENOZOIC_BOUNDARY, compressionFactor);
@@ -78,10 +86,28 @@
 
 				const ratio = (scaledTime - scaledMin) / (scaledBoundary - scaledMin);
 				return PADDING + ratio * ancientWidth;
+			} else if (time <= HUMAN_BOUNDARY) {
+				// Middle time (Cenozoic to Human era): lighter asinh compression
+				const compressionFactor = 1e6;
+				const scaledStart = asinhScale(CENOZOIC_BOUNDARY, compressionFactor);
+				const scaledEnd = asinhScale(HUMAN_BOUNDARY, compressionFactor);
+				const scaledTime = asinhScale(time, compressionFactor);
+
+				const ratio = (scaledTime - scaledStart) / (scaledEnd - scaledStart);
+				return PADDING + ancientWidth + ratio * middleWidth;
+			} else if (time <= HISTORICAL_BOUNDARY) {
+				// Human time (-2M to -10k): very light asinh compression
+				const compressionFactor = 1e4;
+				const scaledStart = asinhScale(HUMAN_BOUNDARY, compressionFactor);
+				const scaledEnd = asinhScale(HISTORICAL_BOUNDARY, compressionFactor);
+				const scaledTime = asinhScale(time, compressionFactor);
+
+				const ratio = (scaledTime - scaledStart) / (scaledEnd - scaledStart);
+				return PADDING + ancientWidth + middleWidth + ratio * humanWidth;
 			} else {
-				// Recent time: use linear scale (more spread out)
-				const ratio = (time - CENOZOIC_BOUNDARY) / (maxTime - CENOZOIC_BOUNDARY);
-				return PADDING + ancientWidth + ratio * recentWidth;
+				// Historical time (-10k to present): fully linear
+				const ratio = (time - HISTORICAL_BOUNDARY) / (maxTime - HISTORICAL_BOUNDARY);
+				return PADDING + ancientWidth + middleWidth + humanWidth + ratio * historicalWidth;
 			}
 		} else {
 			// Linear scale
@@ -98,14 +124,13 @@
 		const range = maxTime - minTime;
 
 		if (scaleType === 'log') {
-			// Piecewise scale: different markers for ancient vs recent
+			// 3-piece piecewise scale: different markers for each era
 
-			// Ancient era markers (Big Bang to Cenozoic) - key geological dates
+			// Ancient era markers (Big Bang to Cenozoic -66M)
 			const ancientMarkers = [
 				-13800000000, // Big Bang
 				-4500000000, // Solar System
 				-3800000000, // First life
-				-2500000000, // Great Oxidation
 				-541000000, // Cambrian explosion
 				-252000000, // Permian extinction
 				-66000000 // Cenozoic boundary
@@ -116,13 +141,26 @@
 				}
 			}
 
-			// Recent era markers (Cenozoic to present) - more frequent
-			const recentMarkers = [
-				-50000000, -20000000, -10000000, -5000000, -2000000, -500000, -100000, -10000, -5000, 0,
-				1000, 2000
-			];
-			for (const d of recentMarkers) {
-				if (d > CENOZOIC_BOUNDARY && d <= maxTime) {
+			// Middle era markers (Cenozoic -66M to Human era -2M)
+			const middleMarkers = [-50000000, -20000000, -10000000, -5000000, -2000000];
+			for (const d of middleMarkers) {
+				if (d > CENOZOIC_BOUNDARY && d <= HUMAN_BOUNDARY) {
+					markers.push(d);
+				}
+			}
+
+			// Human era markers (-2M to -10k)
+			const humanMarkers = [-1500000, -1000000, -500000, -200000, -100000, -50000, -20000, -10000];
+			for (const d of humanMarkers) {
+				if (d > HUMAN_BOUNDARY && d <= HISTORICAL_BOUNDARY) {
+					markers.push(d);
+				}
+			}
+
+			// Historical era markers (-10k to present) - most frequent
+			const historicalMarkers = [-8000, -5000, -3000, -2000, -1000, -500, 0, 500, 1000, 1500, 2000];
+			for (const d of historicalMarkers) {
+				if (d > HISTORICAL_BOUNDARY && d <= maxTime) {
 					markers.push(d);
 				}
 			}
@@ -144,7 +182,7 @@
 		return markers.sort((a, b) => a - b);
 	}
 
-	// Format time for display
+	// Format time for display with comma separators
 	function formatTime(time: number): string {
 		const absTime = Math.abs(time);
 
@@ -153,10 +191,11 @@
 		} else if (absTime >= 1000000) {
 			return `${(time / 1000000).toFixed(1)} Ma`;
 		} else if (absTime >= 1000) {
+			const formatted = Math.abs(time).toLocaleString();
 			if (time < 0) {
-				return `${Math.abs(time)} BC`;
+				return `${formatted} BC`;
 			}
-			return `${time} AD`;
+			return `${formatted} AD`;
 		} else {
 			if (time < 0) {
 				return `${Math.abs(time)} BC`;

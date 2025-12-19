@@ -392,6 +392,14 @@
     "gender": 1
   },
   {
+    "id": "schopenhauer",
+    "name": "Arthur Schopenhauer",
+    "born": 1788,
+    "died": 1860,
+    "image": "/images/people/schopenhauer.jpg",
+    "gender": 1
+  },
+  {
     "id": "cauchy",
     "name": "Augustin-Louis Cauchy",
     "born": 1789,
