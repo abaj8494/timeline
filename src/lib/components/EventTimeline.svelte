@@ -116,11 +116,11 @@
 		}
 	}
 
-	// Generate time markers
+	// Generate time markers with overlap detection
 	$: timeMarkers = generateTimeMarkers();
 
 	function generateTimeMarkers() {
-		const markers = [];
+		const markerValues: number[] = [];
 		const range = maxTime - minTime;
 
 		if (scaleType === 'log') {
@@ -137,7 +137,7 @@
 			];
 			for (const d of ancientMarkers) {
 				if (d >= minTime && d <= CENOZOIC_BOUNDARY) {
-					markers.push(d);
+					markerValues.push(d);
 				}
 			}
 
@@ -145,7 +145,7 @@
 			const middleMarkers = [-50000000, -20000000, -10000000, -5000000, -2000000];
 			for (const d of middleMarkers) {
 				if (d > CENOZOIC_BOUNDARY && d <= HUMAN_BOUNDARY) {
-					markers.push(d);
+					markerValues.push(d);
 				}
 			}
 
@@ -153,7 +153,7 @@
 			const humanMarkers = [-1500000, -1000000, -500000, -200000, -100000, -50000, -20000, -10000];
 			for (const d of humanMarkers) {
 				if (d > HUMAN_BOUNDARY && d <= HISTORICAL_BOUNDARY) {
-					markers.push(d);
+					markerValues.push(d);
 				}
 			}
 
@@ -161,7 +161,7 @@
 			const historicalMarkers = [-8000, -5000, -3000, -2000, -1000, -500, 0, 500, 1000, 1500, 2000];
 			for (const d of historicalMarkers) {
 				if (d > HISTORICAL_BOUNDARY && d <= maxTime) {
-					markers.push(d);
+					markerValues.push(d);
 				}
 			}
 		} else {
@@ -175,11 +175,57 @@
 
 			const startMarker = Math.ceil(minTime / interval) * interval;
 			for (let m = startMarker; m <= maxTime; m += interval) {
-				markers.push(m);
+				markerValues.push(m);
 			}
 		}
 
-		return markers.sort((a, b) => a - b);
+		// Sort markers
+		markerValues.sort((a, b) => a - b);
+
+		// Now assign above/below positions based on overlap
+		// A marker needs to be below if it would overlap with the previous marker
+		const MIN_MARKER_DISTANCE = 60; // Minimum pixel distance between markers to avoid overlap
+		const markers: { value: number; above: boolean }[] = [];
+
+		for (let i = 0; i < markerValues.length; i++) {
+			const value = markerValues[i];
+			const xPos = timeToX(value);
+
+			// Check if this marker overlaps with the previous marker on the same level
+			let above = true;
+
+			if (i > 0) {
+				// Find the nearest previous marker that's on the same level (above)
+				for (let j = i - 1; j >= 0; j--) {
+					if (markers[j].above === above) {
+						const prevXPos = timeToX(markers[j].value);
+						if (Math.abs(xPos - prevXPos) < MIN_MARKER_DISTANCE) {
+							// Overlaps with previous above marker, put this one below
+							above = false;
+						}
+						break;
+					}
+				}
+
+				// If we chose below, also check if that overlaps with previous below marker
+				if (!above) {
+					for (let j = i - 1; j >= 0; j--) {
+						if (!markers[j].above) {
+							const prevXPos = timeToX(markers[j].value);
+							if (Math.abs(xPos - prevXPos) < MIN_MARKER_DISTANCE) {
+								// Even below overlaps, just put it above (it will overlap but we tried)
+								above = true;
+							}
+							break;
+						}
+					}
+				}
+			}
+
+			markers.push({ value, above });
+		}
+
+		return markers;
 	}
 
 	// Format time for display with comma separators
@@ -282,6 +328,19 @@
 	let initialScale = 1;
 	let currentScale = 1;
 
+	// Touch panning state
+	let isTouchPanning = false;
+	let touchStartX = 0;
+	let touchStartY = 0;
+	let touchLastPanX = 0;
+	let touchLastPanY = 0;
+
+	// Pinch center point for zoom
+	let pinchCenterX = 0;
+	let pinchCenterY = 0;
+	let pinchPanX = 0;
+	let pinchPanY = 0;
+
 	onMount(() => {
 		container = document.querySelector('.event-timeline-container');
 		if (container) {
@@ -372,26 +431,87 @@
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
+	function getTouchCenter(touches) {
+		return {
+			x: (touches[0].clientX + touches[1].clientX) / 2,
+			y: (touches[0].clientY + touches[1].clientY) / 2
+		};
+	}
+
 	function handleTouchStart(e: TouchEvent) {
-		if (e.touches.length === 2) {
+		if ((e.target as HTMLElement).closest('.event-bar, .event-label, .event-popup')) return;
+
+		if (e.touches.length === 1) {
+			// Single finger - start panning
 			e.preventDefault();
+			isTouchPanning = true;
+			touchStartX = e.touches[0].clientX;
+			touchStartY = e.touches[0].clientY;
+			touchLastPanX = panX;
+			touchLastPanY = panY;
+			if (selectedItem) selectedItem = null;
+		} else if (e.touches.length === 2) {
+			// Two fingers - start pinch zoom
+			e.preventDefault();
+			isTouchPanning = false;
 			touchStartDistance = getTouchDistance(e.touches);
 			initialScale = currentScale;
+
+			// Store pinch center for zoom-toward-pinch behavior
+			if (container) {
+				const rect = container.getBoundingClientRect();
+				const center = getTouchCenter(e.touches);
+				pinchCenterX = center.x - rect.left;
+				pinchCenterY = center.y - rect.top;
+				pinchPanX = panX;
+				pinchPanY = panY;
+			}
 		}
 	}
 
 	function handleTouchMove(e: TouchEvent) {
-		if (e.touches.length === 2 && touchStartDistance > 0) {
+		if (e.touches.length === 1 && isTouchPanning) {
+			// Single finger panning
+			e.preventDefault();
+			const dx = e.touches[0].clientX - touchStartX;
+			const dy = e.touches[0].clientY - touchStartY;
+			panX = touchLastPanX + dx;
+			panY = touchLastPanY + dy;
+		} else if (e.touches.length === 2 && touchStartDistance > 0) {
+			// Pinch to zoom centered on pinch point
 			e.preventDefault();
 			const currentDistance = getTouchDistance(e.touches);
 			const scaleChange = currentDistance / touchStartDistance;
-			currentScale = Math.max(0.1, Math.min(20, initialScale * scaleChange));
-			// Transform is applied via the style binding in the template
+			const newScale = Math.max(0.1, Math.min(20, initialScale * scaleChange));
+
+			if (newScale !== currentScale && container) {
+				// Calculate the point in content coordinates before zoom
+				const contentX = (pinchCenterX - pinchPanX) / initialScale;
+				const contentY = (pinchCenterY - pinchPanY) / initialScale;
+
+				// Update scale
+				currentScale = newScale;
+
+				// Adjust pan so the pinch center stays in place
+				panX = pinchCenterX - contentX * currentScale;
+				panY = pinchCenterY - contentY * currentScale;
+			}
 		}
 	}
 
 	function handleTouchEnd(e: TouchEvent) {
-		if (e.touches.length < 2) touchStartDistance = 0;
+		if (e.touches.length === 0) {
+			isTouchPanning = false;
+			touchStartDistance = 0;
+		} else if (e.touches.length === 1) {
+			// Transitioned from pinch to single touch - restart pan tracking
+			touchStartDistance = 0;
+			isTouchPanning = true;
+			touchStartX = e.touches[0].clientX;
+			touchStartY = e.touches[0].clientY;
+			touchLastPanX = panX;
+			touchLastPanY = panY;
+		}
 	}
 
 	function handleItemClick(item, e) {
@@ -481,11 +601,16 @@
 
 			<!-- Time markers -->
 			{#each timeMarkers as marker}
-				{@const xPos = timeToX(marker)}
+				{@const xPos = timeToX(marker.value)}
 				{#if xPos >= PADDING && xPos <= effectiveWidth - PADDING}
 					<line x1={xPos} y1={0} x2={xPos} y2={height} class="time-marker-line" />
-					<text x={xPos} y={TIMELINE_Y - 15} text-anchor="middle" class="time-marker">
-						{formatTime(marker)}
+					<text
+						x={xPos}
+						y={marker.above ? TIMELINE_Y - 15 : TIMELINE_Y + 25}
+						text-anchor="middle"
+						class="time-marker"
+					>
+						{formatTime(marker.value)}
 					</text>
 				{/if}
 			{/each}

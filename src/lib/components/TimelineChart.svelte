@@ -68,11 +68,57 @@
 		return (year - earliestYear) * YEAR_PIXEL_RATIO + PADDING;
 	}
 
-	// Generate major time markers (centuries)
-	$: timeMarkers = Array.from(
-		{ length: Math.ceil((latestYear - earliestYear) / 100) + 1 },
-		(_, i) => Math.floor(earliestYear / 100) * 100 + i * 100
-	);
+	// Generate major time markers (centuries) with overlap detection
+	$: timeMarkers = generateTimeMarkers();
+
+	function generateTimeMarkers() {
+		const MIN_MARKER_DISTANCE = 60; // Minimum pixel distance between markers
+		const markerValues = Array.from(
+			{ length: Math.ceil((latestYear - earliestYear) / 100) + 1 },
+			(_, i) => Math.floor(earliestYear / 100) * 100 + i * 100
+		);
+
+		const markers: { value: number; above: boolean }[] = [];
+
+		for (let i = 0; i < markerValues.length; i++) {
+			const value = markerValues[i];
+			const xPos = yearToX(value);
+
+			let above = true;
+
+			if (i > 0) {
+				// Find the nearest previous marker that's on the same level (above)
+				for (let j = i - 1; j >= 0; j--) {
+					if (markers[j].above === above) {
+						const prevXPos = yearToX(markers[j].value);
+						if (Math.abs(xPos - prevXPos) < MIN_MARKER_DISTANCE) {
+							// Overlaps with previous above marker, put this one below
+							above = false;
+						}
+						break;
+					}
+				}
+
+				// If we chose below, also check if that overlaps with previous below marker
+				if (!above) {
+					for (let j = i - 1; j >= 0; j--) {
+						if (!markers[j].above) {
+							const prevXPos = yearToX(markers[j].value);
+							if (Math.abs(xPos - prevXPos) < MIN_MARKER_DISTANCE) {
+								// Even below overlaps, just put it above
+								above = true;
+							}
+							break;
+						}
+					}
+				}
+			}
+
+			markers.push({ value, above });
+		}
+
+		return markers;
+	}
 
 	// Format year with BC/AD
 	function formatYear(year: number): string {
@@ -182,6 +228,19 @@
 	let currentScale = 1;
 	let containerWidth = 0;
 	let containerHeight = 0;
+
+	// Touch panning state
+	let isTouchPanning = false;
+	let touchStartX = 0;
+	let touchStartY = 0;
+	let touchLastPanX = 0;
+	let touchLastPanY = 0;
+
+	// Pinch center point for zoom
+	let pinchCenterX = 0;
+	let pinchCenterY = 0;
+	let pinchPanX = 0;
+	let pinchPanY = 0;
 
 	// Calculate minimum width to fill viewport
 	$: effectiveWidth = Math.max(width, containerWidth / 0.5);
@@ -293,26 +352,91 @@
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
+	function getTouchCenter(touches: TouchList) {
+		return {
+			x: (touches[0].clientX + touches[1].clientX) / 2,
+			y: (touches[0].clientY + touches[1].clientY) / 2
+		};
+	}
+
 	function handleTouchStart(e: TouchEvent) {
-		if (e.touches.length === 2) {
+		if (
+			(e.target as HTMLElement).closest(
+				'.person-bar, .book-dot, .person-name, .book-title, .image-popup'
+			)
+		)
+			return;
+
+		if (e.touches.length === 1) {
+			// Single finger - start panning
 			e.preventDefault();
+			isTouchPanning = true;
+			touchStartX = e.touches[0].clientX;
+			touchStartY = e.touches[0].clientY;
+			touchLastPanX = panX;
+			touchLastPanY = panY;
+			if (selectedPerson) selectedPerson = null;
+		} else if (e.touches.length === 2) {
+			// Two fingers - start pinch zoom
+			e.preventDefault();
+			isTouchPanning = false;
 			touchStartDistance = getTouchDistance(e.touches);
 			initialScale = currentScale;
+
+			// Store pinch center for zoom-toward-pinch behavior
+			if (container) {
+				const rect = container.getBoundingClientRect();
+				const center = getTouchCenter(e.touches);
+				pinchCenterX = center.x - rect.left;
+				pinchCenterY = center.y - rect.top;
+				pinchPanX = panX;
+				pinchPanY = panY;
+			}
 		}
 	}
 
 	function handleTouchMove(e: TouchEvent) {
-		if (e.touches.length === 2 && touchStartDistance > 0) {
+		if (e.touches.length === 1 && isTouchPanning) {
+			// Single finger panning
+			e.preventDefault();
+			const dx = e.touches[0].clientX - touchStartX;
+			const dy = e.touches[0].clientY - touchStartY;
+			panX = touchLastPanX + dx;
+			panY = touchLastPanY + dy;
+		} else if (e.touches.length === 2 && touchStartDistance > 0) {
+			// Pinch to zoom centered on pinch point
 			e.preventDefault();
 			const currentDistance = getTouchDistance(e.touches);
 			const scaleChange = currentDistance / touchStartDistance;
-			currentScale = Math.max(0.1, Math.min(20, initialScale * scaleChange));
+			const newScale = Math.max(0.1, Math.min(20, initialScale * scaleChange));
+
+			if (newScale !== currentScale && container) {
+				// Calculate the point in content coordinates before zoom
+				const contentX = (pinchCenterX - pinchPanX) / initialScale;
+				const contentY = (pinchCenterY - pinchPanY) / initialScale;
+
+				// Update scale
+				currentScale = newScale;
+
+				// Adjust pan so the pinch center stays in place
+				panX = pinchCenterX - contentX * currentScale;
+				panY = pinchCenterY - contentY * currentScale;
+			}
 		}
 	}
 
 	function handleTouchEnd(e: TouchEvent) {
-		if (e.touches.length < 2) {
+		if (e.touches.length === 0) {
+			isTouchPanning = false;
 			touchStartDistance = 0;
+		} else if (e.touches.length === 1) {
+			// Transitioned from pinch to single touch - restart pan tracking
+			touchStartDistance = 0;
+			isTouchPanning = true;
+			touchStartX = e.touches[0].clientX;
+			touchStartY = e.touches[0].clientY;
+			touchLastPanX = panX;
+			touchLastPanY = panY;
 		}
 	}
 
@@ -390,10 +514,21 @@
 			<rect x="0" y="0" width={effectiveWidth} {height} fill="#17191C" />
 
 			<!-- Time markers -->
-			{#each timeMarkers as year}
-				<line x1={yearToX(year)} y1={0} x2={yearToX(year)} y2={height} class="time-marker-line" />
-				<text x={yearToX(year)} y={TIMELINE_Y - 20} text-anchor="middle" class="time-marker">
-					{formatYear(year)}
+			{#each timeMarkers as marker}
+				<line
+					x1={yearToX(marker.value)}
+					y1={0}
+					x2={yearToX(marker.value)}
+					y2={height}
+					class="time-marker-line"
+				/>
+				<text
+					x={yearToX(marker.value)}
+					y={marker.above ? TIMELINE_Y - 20 : TIMELINE_Y + 30}
+					text-anchor="middle"
+					class="time-marker"
+				>
+					{formatYear(marker.value)}
 				</text>
 			{/each}
 
